@@ -19,6 +19,14 @@ F1 is a strong **Godot Web compatibility probe** because its published WebGL dem
 | Pixabay audio and third-party music are used | Upstream README | High |
 | F1 branding/fonts are third-party trademarks | Upstream README | High |
 
+| Élément	| Constat |
+| Point d'input humain |	race_car.gd, fonctions _get_action_steering_angle() et _input_process() |
+| Mécanisme actuel |	Actions Godot globales ui_left/right/up/down, aucune notion de device ou playerId |
+| Distinction joueur/IA |	Une seule voiture humaine par partie, sélectionnée via Global.my_race_car_idx dans circuit.gd |
+| Slots disponibles	| 4 positions fixes ($P1-$P4) déjà présentes dans les scènes de circuit |
+| Mode multijoueur UI |	Placeholder non implémenté (print_debug("MULTIPLAYER not implemented, yet")) |
+| Verdict |	Isolation nécessite une réécriture ciblée du point d'input, pas une simple activation de fonctionnalité existante |
+
 ## Technical fit
 
 | Criterion | Status | Notes |

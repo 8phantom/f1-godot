@@ -161,10 +161,10 @@ func _get_ctx_steering_angle() -> float:
 	var steer_angle = a * self.max_steering_rad * 2.0
 	self._acceleration = -self.transform.basis.z * self.pc_engine_power
 	# check forward ray
-	var ray := self.ctx_rays.get_child(0)
+	var ray: RayCast = self.ctx_rays.get_child(0)
 	if ray.is_colliding():
 		var obj = ray.get_collider()
-		var is_colliding_with_car := Global.race_car_registry.has(obj.get_instance_id())
+		var is_colliding_with_car = Global.race_car_registry.has(obj.get_instance_id())
 		var d = transform.origin.distance_to(obj.transform.origin)
 		if (not is_colliding_with_car and d < CTX_BRAKE_DISTANCE) or (d < CTX_BRAKE_CAR_DISTANCE):
 			self._acceleration = -self.transform.basis.z * self.braking_power

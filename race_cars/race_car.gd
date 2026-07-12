@@ -83,6 +83,14 @@ var _camera_position_idx: int = 0
 var get_steering_angle: FuncRef = null
 var get_path_direction: FuncRef = null
 
+# virtual input state — placeholder pour futur adaptateur plateforme
+# rempli plus tard par set_input(), lu à la place des actions Godot globales
+var virtual_input := {
+	"left": false,
+	"right": false,
+	"up": false,
+	"down": false
+}
 
 # context behaviors
 const CTX_N_RAYS: int = 32
@@ -141,7 +149,9 @@ func _ready():
 		play_engine_sound(ENGINE)
 
 func _get_action_steering_angle() -> float:
-	var strength: float = Input.get_action_strength("ui_left") - Input.get_action_strength("ui_right")
+	var left_strength: float = 1.0 if self.virtual_input["left"] else 0.0
+	var right_strength: float = 1.0 if self.virtual_input["right"] else 0.0
+	var strength: float = left_strength - right_strength
 	return strength * self.max_steering_rad
 
 func _get_gravity_steering_angle() -> float:
@@ -171,6 +181,10 @@ func _get_ctx_steering_angle() -> float:
 
 	return steer_angle
 
+func set_input(action: String, pressed: bool) -> void:
+	if self.virtual_input.has(action):
+		self.virtual_input[action] = pressed
+
 func _input(event: InputEvent):
 	if event.is_action_pressed("ui_select"):
 		print_debug(global_translation)
@@ -181,15 +195,26 @@ func _input(event: InputEvent):
 	if Input.is_action_just_released("ui_up") or event.is_action_pressed("ui_down"):
 		play_engine_sound(BRAKING)
 
+	# --- PONT TEMPORAIRE DE TEST (Gate 3) ---
+	# À supprimer au Gate 4 quand l'adaptateur postMessage appellera set_input() directement.
+	if event.is_action_pressed("ui_left"): set_input("left", true)
+	if event.is_action_released("ui_left"): set_input("left", false)
+	if event.is_action_pressed("ui_right"): set_input("right", true)
+	if event.is_action_released("ui_right"): set_input("right", false)
+	if event.is_action_pressed("ui_up"): set_input("up", true)
+	if event.is_action_released("ui_up"): set_input("up", false)
+	if event.is_action_pressed("ui_down"): set_input("down", true)
+	if event.is_action_released("ui_down"): set_input("down", false)
+
 func _input_process():
 	if self.get_path_direction != null:
 		self._steering_angle = _get_ctx_steering_angle()
 		return
 
 	self._steering_angle = self.get_steering_angle.call_func()
-	if Input.is_action_pressed("ui_up"):
+	if self.virtual_input["up"]:
 		self._acceleration = -self.transform.basis.z * self.engine_power
-	if Input.is_action_pressed("ui_down"):
+	if self.virtual_input["down"]:
 		self._acceleration = -self.transform.basis.z * self.braking_power
 
 

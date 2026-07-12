@@ -67,6 +67,10 @@ func _circuit_ready():
 			car.body.set_mesh(Global.my_race_car_body())
 
 		Global.Mode.RACING:
+			# TEMPORAIRE (Gate 3) : 2 joueurs humains fixes (index 0 et 1), reste IA.
+			# Sera remplacé au Gate suivant par une liste de playerId fournie par le hub.
+			var HUMAN_CAR_INDICES = [0, 1]
+
 			var pos := [$P1, $P2, $P3, $P4]
 			for i in range(len(pos)):
 				var car = RaceCar.instance()
@@ -79,10 +83,11 @@ func _circuit_ready():
 				self.race_cars_idx[car.get_instance_id()] = i
 				car.call_deferred("set_physics_process", false)
 				car.translate(pos[i].translation)
-				if i == Global.my_race_car_idx:
-					self.my_race_car_id = car.get_instance_id()
+				if i in HUMAN_CAR_INDICES:
 					car.get_path_direction = null
-					# car.set_label(Global.my_unique_id)
+					if i == Global.my_race_car_idx:
+						self.my_race_car_id = car.get_instance_id()
+					car.set_label("P" + str(i+1))
 				else:
 					car.get_path_direction = self.get_path_direction
 					car.set_label("PC" + str(i+1))
@@ -102,6 +107,37 @@ func _circuit_ready():
 	# uncomment following line to skip zoom camera intro
 #	_on_zoom_camera_position_set()
 
+# --- HARNAIS DE TEST CLAVIER 2 JOUEURS (Gate 3) ---
+# À supprimer quand l'adaptateur postMessage appellera set_input() sur chaque voiture
+# depuis le hub, avec un vrai playerId au lieu d'une touche physique.
+func _unhandled_input(event: InputEvent):
+	if Global.game_play_mode != Global.Mode.RACING:
+		return
+	if not event is InputEventKey:
+		return
+	if self.race_cars.size() < 2:
+		return
+
+	var p1_car = self.race_cars[0].car
+	var p2_car = self.race_cars[1].car
+
+	match event.scancode:
+		KEY_LEFT:
+			p1_car.set_input("left", event.pressed)
+		KEY_RIGHT:
+			p1_car.set_input("right", event.pressed)
+		KEY_UP:
+			p1_car.set_input("up", event.pressed)
+		KEY_DOWN:
+			p1_car.set_input("down", event.pressed)
+		KEY_A:
+			p2_car.set_input("left", event.pressed)
+		KEY_D:
+			p2_car.set_input("right", event.pressed)
+		KEY_W:
+			p2_car.set_input("up", event.pressed)
+		KEY_S:
+			p2_car.set_input("down", event.pressed)
 
 func _process(delta: float):
 	self.time_elapsed += delta

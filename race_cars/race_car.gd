@@ -195,17 +195,6 @@ func _input(event: InputEvent):
 	if Input.is_action_just_released("ui_up") or event.is_action_pressed("ui_down"):
 		play_engine_sound(BRAKING)
 
-	# --- PONT TEMPORAIRE DE TEST (Gate 3) ---
-	# À supprimer au Gate 4 quand l'adaptateur postMessage appellera set_input() directement.
-	if event.is_action_pressed("ui_left"): set_input("left", true)
-	if event.is_action_released("ui_left"): set_input("left", false)
-	if event.is_action_pressed("ui_right"): set_input("right", true)
-	if event.is_action_released("ui_right"): set_input("right", false)
-	if event.is_action_pressed("ui_up"): set_input("up", true)
-	if event.is_action_released("ui_up"): set_input("up", false)
-	if event.is_action_pressed("ui_down"): set_input("down", true)
-	if event.is_action_released("ui_down"): set_input("down", false)
-
 func _input_process():
 	if self.get_path_direction != null:
 		self._steering_angle = _get_ctx_steering_angle()
